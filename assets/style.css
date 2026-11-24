@@ -1,0 +1,68 @@
+:root {
+  color-scheme: light dark;
+  --ink: #1d1b16; --paper: #f6f1e7; --rule: #c9bfa8; --accent: #7a4e1d; --muted: #6b6253;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #ece6d8; --paper: #1b1915; --rule: #4a443a; --accent: #d9a066; --muted: #a39a89; }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 18px/1.65 Georgia, "Times New Roman", serif;
+}
+a { color: var(--accent); }
+header.site, main, footer.site { max-width: 44rem; margin: 0 auto; padding: 0 1.25rem; }
+header.site {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-top: 1.5rem; padding-bottom: .5rem; border-bottom: 2px solid var(--ink);
+}
+header.site .brand { font-style: italic; font-size: 1.3rem; color: var(--ink); text-decoration: none; }
+header.site nav a { margin-left: 1rem; font-size: .9rem; }
+main { padding-top: 1.5rem; padding-bottom: 3rem; }
+footer.site { border-top: 1px solid var(--rule); padding-top: 1rem; padding-bottom: 2rem; font-size: .85rem; color: var(--muted); }
+h1, h2, h3 { font-weight: normal; line-height: 1.25; }
+h2 { margin-top: 2.5rem; border-bottom: 1px solid var(--rule); padding-bottom: .2rem; }
+img { max-width: 100%; height: auto; }
+blockquote { margin: 1.5rem 0; padding-left: 1rem; border-left: 3px solid var(--accent); color: var(--muted); font-style: italic; }
+code, pre { font: .85em/1.45 ui-monospace, Menlo, Consolas, monospace; }
+pre { overflow-x: auto; padding: .75rem; border: 1px solid var(--rule); }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; margin: 1rem 0; }
+th, td { text-align: left; vertical-align: top; padding: .4rem .5rem; border-bottom: 1px solid var(--rule); }
+.meta, .lede { color: var(--muted); font-size: .9rem; }
+.lede { font-size: 1.05rem; }
+ol.lessons { list-style: none; padding: 0; }
+ol.lessons li { margin: 1.5rem 0; }
+ol.lessons .num { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: .5rem; }
+ol.lessons .title { font-size: 1.25rem; }
+ol.lessons p { margin: .2rem 0; }
+
+/* lesson structure */
+.label { font: .72rem/1.4 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 .4rem; }
+.takeaways { border: 1px solid var(--rule); border-left: 3px solid var(--accent); padding: .9rem 1.1rem; margin: 2rem 0; font-size: .95rem; }
+.takeaways ul { margin: 0; padding-left: 1.1rem; }
+.takeaways li { margin: .25rem 0; }
+.lesson-body { position: relative; counter-reset: sec; }
+.lesson-body h2::before { counter-increment: sec; content: counter(sec, decimal-leading-zero); font: .8rem ui-monospace, Menlo, Consolas, monospace; color: var(--accent); margin-right: .7rem; vertical-align: .2em; }
+.toc ol { margin: 0; padding-left: 2.4rem; font-size: .9rem; list-style: decimal-leading-zero; }
+.toc li::marker { color: var(--muted); font: .75rem ui-monospace, Menlo, Consolas, monospace; }
+.toc a { color: var(--ink); text-decoration: none; }
+.toc a:hover { color: var(--accent); text-decoration: underline; }
+@media (min-width: 1180px) {
+  .toc { position: absolute; top: 0; bottom: 0; right: calc(100% + 2.5rem); width: 11rem; }
+  .toc-inner { position: sticky; top: 1.5rem; }
+}
+@media (max-width: 1179px) {
+  .toc { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: .8rem 0; margin-bottom: 1rem; }
+}
+figure { margin: 2rem 0; }
+figcaption { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+figure.diagram { overflow-x: auto; }
+figure.diagram img { display: block; width: 100%; min-width: 600px; }
+figure.demo iframe { display: block; width: 100%; height: 80vh; border: 1px solid var(--rule); background: var(--paper); }
+blockquote:has(.callout-label) { font-style: normal; color: var(--ink); background: color-mix(in srgb, var(--accent) 8%, transparent); padding: .8rem 1rem; }
+blockquote .callout-label { font: .72rem ui-monospace, Menlo, Consolas, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 0 0 .3rem; }
+blockquote:has(.callout-label) p:last-child { margin-bottom: 0; }
+.card { border: 1px solid var(--rule); padding: .2rem 1.2rem .6rem; margin: 1.5rem 0; }
+.card.next { border-style: dashed; }
+.card h3 { margin-top: 1rem; }
+th { font-weight: normal; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--ink); }

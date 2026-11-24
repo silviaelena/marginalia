@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 620" width="760" height="620" role="img" aria-labelledby="who-vouches-title who-vouches-desc">
+<title id="who-vouches-title">Who vouches for you: a sign-in, step by step</title>
+<desc id="who-vouches-desc">You sign in once at the identity provider, which signs a token; the app checks that token with the provider's public key and lets you in without ever seeing your password.</desc>
+<style>
+  .bg{fill:#f6f1e7} .paper{fill:#f6f1e7} .box{fill:#f6f1e7;stroke:#1d1b16}
+  .box-acc{fill:#f6f1e7;stroke:#7a4e1d}
+  .life{stroke:#1d1b16;stroke-opacity:.3} .bar{fill:#e7ddca;stroke:#6b6253}
+  .call{stroke:#6b6253;fill:none} .ret{stroke:#6b6253;fill:none;stroke-dasharray:5 4}
+  .hl{stroke:#7a4e1d;fill:none} .rule{stroke:#c9bfa8}
+  .mk{fill:#6b6253} .mk-acc{fill:#7a4e1d} .dot{fill:#1d1b16} .dot-acc{fill:#7a4e1d}
+  .name{fill:#1d1b16;font:600 14px system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif} .name-s{fill:#1d1b16;font:600 13px system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif}
+  .sub{fill:#6b6253;font:10px ui-monospace, Menlo, Consolas, monospace;letter-spacing:.04em}
+  .lbl{fill:#6b6253;font:10px ui-monospace, Menlo, Consolas, monospace;letter-spacing:.06em} .lbl-acc{fill:#7a4e1d;font:600 10px ui-monospace, Menlo, Consolas, monospace;letter-spacing:.06em}
+  .note{fill:#6b6253;font:italic 14px Georgia, 'Times New Roman', serif} .eyebrow{fill:#6b6253;font:9px ui-monospace, Menlo, Consolas, monospace;letter-spacing:.14em}
+  @media (prefers-color-scheme: dark) {
+    .bg,.paper{fill:#1b1915} .box{fill:#1b1915;stroke:#ece6d8} .box-acc{fill:#1b1915;stroke:#d9a066}
+    .life{stroke:#ece6d8} .bar{fill:#2e2a23;stroke:#a39a89}
+    .call,.ret{stroke:#a39a89} .hl{stroke:#d9a066} .rule{stroke:#4a443a}
+    .mk{fill:#a39a89} .mk-acc,.dot-acc{fill:#d9a066} .dot{fill:#ece6d8}
+    .name,.name-s{fill:#ece6d8} .sub,.lbl,.note,.eyebrow{fill:#a39a89} .lbl-acc{fill:#d9a066}
+  }
+</style>
+<defs>
+  <marker id="who-vouches-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk" points="0 0, 8 3, 0 6"/></marker>
+  <marker id="who-vouches-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon class="mk-acc" points="0 0, 8 3, 0 6"/></marker>
+</defs>
+<rect class="bg" x="0" y="0" width="760" height="620"/>
+<line class="life" x1="112" y1="72" x2="112" y2="540" stroke-dasharray="3 3"/>
+<line class="life" x1="352" y1="72" x2="352" y2="540" stroke-dasharray="3 3"/>
+<line class="life" x1="592" y1="72" x2="592" y2="540" stroke-dasharray="3 3"/>
+<rect class="bar" x="348" y="108" width="8" height="144" stroke-width=".8"/>
+<rect class="bar" x="348" y="324" width="8" height="72" stroke-width=".8"/>
+<rect class="bar" x="588" y="276" width="8" height="244" stroke-width=".8"/>
+<line class="call" x1="112" y1="120" x2="348" y2="120" stroke-width="1.2" marker-end="url(#who-vouches-arrow)"/>
+<rect class="paper" x="200" y="98" width="60" height="14" rx="2"/><text class="lbl" x="230" y="108" text-anchor="middle">SIGN IN</text>
+<path class="call" d="M356 160 H388 Q396 160 396 168 V180 Q396 188 388 188 H358" stroke-width="1.2" marker-end="url(#who-vouches-arrow)"/>
+<rect class="paper" x="404" y="167" width="80" height="14" rx="2"/>
+<text class="lbl" x="410" y="177">SIGN TOKEN</text>
+<line class="ret" x1="348" y1="240" x2="112" y2="240" stroke-width="1.2" marker-end="url(#who-vouches-arrow)"/>
+<rect class="paper" x="183" y="218" width="94" height="14" rx="2"/><text class="lbl" x="230" y="228" text-anchor="middle">SIGNED TOKEN</text>
+<line class="call" x1="112" y1="288" x2="588" y2="288" stroke-width="1.2" marker-end="url(#who-vouches-arrow)"/>
+<rect class="paper" x="192" y="266" width="80" height="14" rx="2"/><text class="lbl" x="232" y="276" text-anchor="middle">SHOW TOKEN</text>
+<line class="call" x1="588" y1="336" x2="356" y2="336" stroke-width="1.2" marker-end="url(#who-vouches-arrow)"/>
+<rect class="paper" x="418" y="314" width="108" height="14" rx="2"/><text class="lbl" x="472" y="324" text-anchor="middle">GET PUBLIC KEY</text>
+<line class="ret" x1="356" y1="384" x2="588" y2="384" stroke-width="1.2" marker-end="url(#who-vouches-arrow)"/>
+<rect class="paper" x="432" y="362" width="80" height="14" rx="2"/><text class="lbl" x="472" y="372" text-anchor="middle">PUBLIC KEY</text>
+<path class="call" d="M596 428 H628 Q636 428 636 436 V448 Q636 456 628 456 H598" stroke-width="1.2" marker-end="url(#who-vouches-arrow)"/>
+<rect class="paper" x="644" y="435" width="94" height="14" rx="2"/>
+<text class="lbl" x="650" y="445">CHECK CLAIMS</text>
+<line class="hl" x1="588" y1="504" x2="112" y2="504" stroke-width="1.2" marker-end="url(#who-vouches-arrow-acc)"/>
+<rect class="paper" x="195" y="482" width="74" height="14" rx="2"/><text class="lbl-acc" x="232" y="492" text-anchor="middle">YOU'RE IN</text>
+<text class="note" x="376" y="120">Your password stops here.</text>
+<text class="note" x="376" y="138">The app never sees it.</text>
+<rect class="box" x="40" y="20" width="144" height="52" rx="6" stroke-width="1.2"/>
+<text class="name" x="112" y="42" text-anchor="middle">You</text>
+<text class="sub" x="112" y="60" text-anchor="middle">browser</text>
+<rect class="box-acc" x="280" y="20" width="144" height="52" rx="6" stroke-width="1.2"/>
+<text class="name" x="352" y="42" text-anchor="middle">Identity provider</text>
+<text class="sub" x="352" y="60" text-anchor="middle">holds private key</text>
+<rect class="box" x="520" y="20" width="144" height="52" rx="6" stroke-width="1.2"/>
+<text class="name" x="592" y="42" text-anchor="middle">App</text>
+<text class="sub" x="592" y="60" text-anchor="middle">relying party</text>
+<line class="rule" x1="32" y1="560" x2="728" y2="560" stroke-width=".8"/>
+<text class="eyebrow" x="32" y="584">LEGEND</text>
+<line class="call" x1="128" y1="580" x2="164" y2="580" stroke-width="1.2" marker-end="url(#who-vouches-arrow)"/>
+<text class="sub" x="176" y="584">request</text>
+<line class="ret" x1="296" y1="580" x2="332" y2="580" stroke-width="1.2" marker-end="url(#who-vouches-arrow)"/>
+<text class="sub" x="344" y="584">reply</text>
+<line class="hl" x1="464" y1="580" x2="500" y2="580" stroke-width="1.2" marker-end="url(#who-vouches-arrow-acc)"/>
+<text class="sub" x="512" y="584">trust granted</text>
+</svg>

@@ -1,0 +1,20 @@
+---
+title: marginalia
+---
+<p class="lede">{{ site.description }}</p>
+
+{% assign lessons = site.pages | where: "layout", "lesson" | sort: "number" | reverse %}
+<ol class="lessons">
+  {% for lesson in lessons %}
+  <li>
+    <span class="num">{{ lesson.number }}</span>
+    <a class="title" href="{{ lesson.url | relative_url }}">{{ lesson.title }}</a>
+    <p>{{ lesson.summary }}</p>
+    <p class="meta">
+      {{ lesson.date | date: "%-d %b %Y" }} ·
+      <a href="{{ lesson.url | relative_url }}demo/">demo</a>
+      {% for tag in lesson.tags %} · <a href="{{ '/tags/' | relative_url }}#{{ tag | slugify }}">#{{ tag }}</a>{% endfor %}
+    </p>
+  </li>
+  {% endfor %}
+</ol>

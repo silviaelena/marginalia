@@ -1,0 +1,52 @@
+---
+layout: default
+---
+{%- assign intro = content | split: '<h2 ' | first -%}
+{%- assign body = content | remove_first: intro
+    | replace: '<p>[!IMPORTANT]', '<p class="callout-label">Important</p><p>'
+    | replace: '<p>[!NOTE]', '<p class="callout-label">Note</p><p>' -%}
+{%- assign sections = body | split: '<h2 id="' -%}
+<article class="lesson">
+  <p class="meta">
+    Lesson {{ page.number }}
+    · published {{ page.date | date: "%-d %b %Y" }}
+    · facts last verified {{ page.last_verified | date: "%-d %b %Y" }}
+    {% if page.tags %}·{% for tag in page.tags %} <a href="{{ '/tags/' | relative_url }}#{{ tag | slugify }}">#{{ tag }}</a>{% endfor %}{% endif %}
+  </p>
+  {{ intro }}
+  {% if page.takeaways %}
+  <aside class="takeaways">
+    <p class="label">In short</p>
+    <ul>{% for t in page.takeaways %}<li>{{ t | markdownify | remove: '<p>' | remove: '</p>' | strip }}</li>{% endfor %}</ul>
+  </aside>
+  {% endif %}
+  <div class="lesson-body">
+    <nav class="toc" aria-label="Contents">
+      <div class="toc-inner">
+        <p class="label">Contents</p>
+        <ol>
+        {%- for s in sections offset: 1 -%}
+          {%- assign id = s | split: '"' | first -%}
+          {%- assign heading = s | split: '</h2>' | first | split: '>' | last -%}
+          <li><a href="#{{ id }}">{{ heading }}</a></li>
+        {%- endfor -%}
+        </ol>
+      </div>
+    </nav>
+    {{ body }}
+  </div>
+</article>
+<script>
+  // Grow each embedded demo to its content height, so the page has one scrollbar.
+  document.querySelectorAll('figure.demo iframe').forEach(function (frame) {
+    function attach() {
+      var doc = frame.contentDocument;
+      if (!doc || !doc.body) return;
+      var fit = function () { frame.style.height = Math.ceil(doc.body.getBoundingClientRect().height) + 'px'; };
+      new ResizeObserver(fit).observe(doc.body);
+      fit();
+    }
+    frame.addEventListener('load', attach);
+    if (frame.contentDocument && frame.contentDocument.readyState === 'complete') attach();
+  });
+</script>

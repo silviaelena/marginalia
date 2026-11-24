@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noai, noimageai">
+<title>001 · Who vouches for you? · token playground</title>
+<style>
+  :root { --ink:#1d1b16; --paper:#f6f1e7; --rule:#c9bfa8; --ok:#2f6b3a; --bad:#9b2c2c; --accent:#7a4e1d; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink:#ece6d8; --paper:#1b1915; --rule:#4a443a; --ok:#7fc48a; --bad:#e08a8a; --accent:#d9a066; }
+  }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 Georgia, "Times New Roman", serif; }
+  main { max-width:1150px; margin:auto; padding:2rem 1rem 4rem; }
+  h1 { font-weight:normal; margin-bottom:.2rem; }
+  .lede { color:var(--accent); margin-top:0; }
+  .embedded h1, .embedded .lede { display:none; }
+  .embedded main { padding-top:1rem; padding-bottom:1rem; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.75rem; }
+  section { border-top:2px solid var(--ink); padding-top:.5rem; }
+  h2 { font-size:.95rem; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); }
+  label { display:block; margin:.5rem 0 .2rem; }
+  textarea, pre, input, select {
+    font:13px/1.4 ui-monospace, Menlo, Consolas, monospace; width:100%; box-sizing:border-box;
+    background:transparent; color:inherit; border:1px solid var(--rule); padding:.5rem; margin:0;
+  }
+  textarea { min-height:8rem; resize:vertical; word-break:break-all; }
+  pre { white-space:pre-wrap; word-break:break-all; min-height:2rem; }
+  button { font:inherit; margin:.3rem .3rem .3rem 0; padding:.3rem .7rem; background:transparent; color:inherit; border:1px solid var(--ink); cursor:pointer; }
+  button:hover { background:var(--ink); color:var(--paper); }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  ul.checks { list-style:none; padding:0; }
+  ul.checks li::before { content:attr(data-mark) "  "; }
+  .note { font-size:.9rem; color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Who vouches for you?</h1>
+  <p class="lede">An identity provider, a signed token, and an app that has to decide whether to believe it.</p>
+
+  <div class="grid">
+    <section>
+      <h2>1 · The identity provider</h2>
+      <label for="user">User</label>
+      <select id="user">
+        <option value="alice">alice (password: wonderland)</option>
+        <option value="bob">bob (password: builder)</option>
+      </select>
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="off" placeholder="wonderland">
+      <label for="aud">Token is meant for</label>
+      <select id="aud">
+        <option value="notes-app">notes-app (the app in panel 3)</option>
+        <option value="payroll-app">payroll-app (some other app)</option>
+      </select>
+      <label><input id="agent" type="checkbox" style="width:auto"> An AI agent acts on my behalf</label>
+      <button id="issue">Sign in and issue token</button>
+      <p id="idp-status"></p>
+      <label for="jwks">Public key the IdP publishes (JWKS)</label>
+      <pre id="jwks">generating key…</pre>
+    </section>
+
+    <section>
+      <h2>2 · The token</h2>
+      <label for="token">Signed token (JWT). You can edit it.</label>
+      <textarea id="token" spellcheck="false"></textarea>
+      <label>Header</label>
+      <pre id="header"></pre>
+      <label>Payload: the claims the IdP vouches for</label>
+      <pre id="payload"></pre>
+      <p class="note">Try to cheat:</p>
+      <button id="t-sub">Rename sub to mallory</button>
+      <button id="t-none">Strip the signature (alg: none)</button>
+      <button id="t-forge">Re-sign with my own key</button>
+    </section>
+
+    <section>
+      <h2>3 · The app (notes-app)</h2>
+      <p>The app never sees a password. It only checks what the IdP signed.</p>
+      <button id="verify">Verify token</button>
+      <button id="clock">Move the app's clock 10 minutes ahead</button>
+      <p id="clock-status" class="note">App clock: now</p>
+      <ul class="checks" id="checks"></ul>
+      <p id="verdict"></p>
+    </section>
+  </div>
+</main>
+
+<script>
+if (window.self !== window.top) document.documentElement.classList.add('embedded');
+const ISSUER = "https://idp.example";
+const APP = "notes-app";
+const KID = "idp-key-1";
+const USERS = { alice: { password: "wonderland", name: "Alice" }, bob: { password: "builder", name: "Bob" } };
+const KEY_ALG = { name: "ECDSA", namedCurve: "P-256" };
+const SIGN_ALG = { name: "ECDSA", hash: "SHA-256" };
+
+const $ = id => document.getElementById(id);
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+const b64u = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes)))
+  .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const unb64u = s => Uint8Array.from(
+  atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+const segment = obj => b64u(enc.encode(JSON.stringify(obj)));
+const parse = s => JSON.parse(dec.decode(unb64u(s)));
+const now = () => Math.floor(Date.now() / 1000);
+
+let idpKeys, publishedJwk, clockSkew = 0;
+
+function say(id, text, cls) { const el = $(id); el.textContent = text; el.className = cls || ""; }
+
+async function sign(payload, privateKey, header = { alg: "ES256", typ: "JWT", kid: KID }) {
+  const signingInput = segment(header) + "." + segment(payload);
+  const signature = await crypto.subtle.sign(SIGN_ALG, privateKey, enc.encode(signingInput));
+  return signingInput + "." + b64u(signature);
+}
+
+function setToken(token) {
+  $("token").value = token;
+  showDecoded();
+  $("checks").replaceChildren();
+  say("verdict", "");
+}
+
+function showDecoded() {
+  const [h, p] = $("token").value.trim().split(".");
+  try { $("header").textContent = JSON.stringify(parse(h), null, 2); } catch { $("header").textContent = "(unreadable)"; }
+  try { $("payload").textContent = JSON.stringify(parse(p), null, 2); } catch { $("payload").textContent = "(unreadable)"; }
+}
+
+function rewrite(mutatePayload, mutateHeader) {
+  const [h, p, s] = $("token").value.trim().split(".");
+  if (!p) return say("verdict", "Issue a token first.", "bad");
+  const header = parse(h), payload = parse(p);
+  mutatePayload?.(payload);
+  mutateHeader?.(header);
+  const keepSig = header.alg === "none" ? "" : s;
+  setToken(segment(header) + "." + segment(payload) + "." + keepSig);
+}
+
+async function issue() {
+  const id = $("user").value, user = USERS[id];
+  if ($("password").value !== user.password) {
+    return say("idp-status", "Wrong password. The IdP vouches for no one.", "bad");
+  }
+  const t = now();
+  const claims = { iss: ISSUER, sub: id, name: user.name, aud: $("aud").value, iat: t, exp: t + 300 };
+  if ($("agent").checked) claims.act = { sub: "agent:summarizer" };
+  setToken(await sign(claims, idpKeys.privateKey));
+  say("idp-status", `Signed in as ${user.name}. Token issued for ${claims.aud}, valid for 5 minutes.`, "ok");
+}
+
+async function forge() {
+  const [, p] = $("token").value.trim().split(".");
+  if (!p) return say("verdict", "Issue a token first.", "bad");
+  const payload = parse(p);
+  payload.sub = "mallory";
+  payload.name = "Mallory";
+  const attacker = await crypto.subtle.generateKey(KEY_ALG, false, ["sign", "verify"]);
+  setToken(await sign(payload, attacker.privateKey));
+}
+
+async function verify() {
+  const [h, p, s = ""] = $("token").value.trim().split(".");
+  let header, payload;
+  try { header = parse(h); payload = parse(p); } catch {
+    return render([["Token can be decoded", false]], null);
+  }
+
+  const { kty, crv, x, y } = publishedJwk;
+  const key = await crypto.subtle.importKey("jwk", { kty, crv, x, y }, KEY_ALG, false, ["verify"]);
+  let signatureOk = false;
+  if (header.alg === "ES256") {
+    try { signatureOk = await crypto.subtle.verify(SIGN_ALG, key, unb64u(s), enc.encode(h + "." + p)); } catch {}
+  }
+
+  const t = now() + clockSkew;
+  const checks = [
+    ['Algorithm is ES256 (never accept "none")', header.alg === "ES256"],
+    ["Signature matches the IdP's published key", signatureOk],
+    [`Issuer is ${ISSUER}`, payload.iss === ISSUER],
+    [`Audience is ${APP} (meant for this app)`, payload.aud === APP],
+    ["Not expired", typeof payload.exp === "number" && t < payload.exp],
+  ];
+  render(checks, payload);
+}
+
+function render(checks, payload) {
+  $("checks").replaceChildren(...checks.map(([label, ok]) => {
+    const li = document.createElement("li");
+    li.dataset.mark = ok ? "✓" : "✗";
+    li.className = ok ? "ok" : "bad";
+    li.textContent = label;
+    return li;
+  }));
+  if (!checks.every(([, ok]) => ok)) return say("verdict", "Rejected. Nobody trustworthy vouches for this token.", "bad");
+  const who = payload.act
+    ? `${payload.act.sub}, acting on behalf of ${payload.name}. Two names: the agent does the work, ${payload.name} answers for it.`
+    : `${payload.name}.`;
+  say("verdict", `Welcome, ${who}`, "ok");
+}
+
+function toggleClock() {
+  clockSkew = clockSkew ? 0 : 600;
+  say("clock-status", clockSkew ? "App clock: 10 minutes ahead" : "App clock: now", "note");
+}
+
+async function init() {
+  idpKeys = await crypto.subtle.generateKey(KEY_ALG, true, ["sign", "verify"]);
+  const jwk = await crypto.subtle.exportKey("jwk", idpKeys.publicKey);
+  publishedJwk = { kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y, kid: KID, use: "sig", alg: "ES256" };
+  $("jwks").textContent = JSON.stringify({ keys: [publishedJwk] }, null, 2);
+
+  $("issue").onclick = issue;
+  $("verify").onclick = verify;
+  $("clock").onclick = toggleClock;
+  $("token").oninput = showDecoded;
+  $("t-sub").onclick = () => rewrite(pl => { pl.sub = "mallory"; pl.name = "Mallory"; });
+  $("t-none").onclick = () => rewrite(null, hd => { hd.alg = "none"; });
+  $("t-forge").onclick = forge;
+}
+
+if (!window.crypto?.subtle) {
+  document.querySelector("main").insertAdjacentHTML("afterbegin",
+    '<p class="bad">Web Crypto is unavailable. Serve this folder with <code>python3 -m http.server</code> and open http://localhost:8000.</p>');
+} else {
+  init();
+}
+</script>
+</body>
+</html>

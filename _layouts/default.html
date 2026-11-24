@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="{{ site.lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="robots" content="noai, noimageai">
+  {% seo %}
+  <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}">
+  <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
+</head>
+<body>
+  <header class="site">
+    <a class="brand" href="{{ '/' | relative_url }}">marginalia</a>
+    <nav>
+      <a href="{{ '/tags/' | relative_url }}">tags</a>
+      <a href="{{ '/feed.xml' | relative_url }}">feed</a>
+      <a href="{{ '/about/' | relative_url }}">about</a>
+    </nav>
+  </header>
+  <main>
+    {{ content }}
+  </main>
+  <footer class="site">
+    © {{ site.time | date: "%Y" }} {{ site.author }}. All rights reserved, including use for AI training ·
+    art in the public domain · <a href="{{ '/about/' | relative_url }}#copyright">details</a>
+  </footer>
+</body>
+</html>
